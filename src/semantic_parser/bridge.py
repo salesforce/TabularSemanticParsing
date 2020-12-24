@@ -13,7 +13,7 @@
         3. BRIDGE assumes the input/output sequences are processed for code synthesis. Especially, units that need to be
             copied as a single unit (e.g. a table name, a field name, a value phrase etc.) needs to be handled so in the
             preprocessing.
-        4. The BRIDGE encoder design is heavily inspired by the Bridge model by (Hwang et al. 2019)
+        4. The BRIDGE encoder design is heavily inspired by the SQLova model (Hwang et al. 2019)
             https://github.com/naver/sqlova
 """
 
