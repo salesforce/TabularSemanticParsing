@@ -62,7 +62,7 @@ tar xf data.tar.bz2 -C data && mv data/data data/wikisql1.1
 The processed data will be stored in a separate pickle file. 
 
 ### Train 
-Train the model.
+Train the model using the following commands. The checkpoint of the best model will be stored in a directory [named using the current model hyperparameters](https://github.com/salesforce/TabularSemanticParsing/blob/25b154d3dc0e25922822433400c453274d38b8c8/src/data_processor/path_utils.py#L309). 
 
 Spider
 ```
@@ -75,7 +75,7 @@ WikiSQL
 ```
 
 ### Inference
-Decode SQL predictions from pre-trained models. 
+Decode SQL predictions from pre-trained models.
 
 Spider
 ```
@@ -86,12 +86,39 @@ WikiSQL
 ```
 ./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --inference 0
 ```
-
 **Note:** 
 1. Add the `--test` flag to the above commands to obtain the test set evaluation results on the corresponding dataset. This flag is invalid for Spider, as its test set is hidden.
 2. Evaluation metrics will be printed out at the end of decoding. The WikiSQL evaluation takes some time because it computes execution accuracy.
 
-### Inference
+#### Using A Specific Checkpoint
+The above commands run inference with the checkpoints stored in the directory specified by the hyperparameters in the configuration file. To use a specific checkpoint, use the `--checkpoint_path [path_to_checkpoint]` flag.
+
+<!--You can download two of our pre-trained checkpoints for Spider here:
+<table>
+   <tr>
+      <td><strong></strong></td>
+      <td>Spider E-SM (dev)</td>
+      <td>Spider Ex-Acc (dev)</td>
+      <td>Spider E-SM (test)</td>
+      <td>Spider Ex-Acc (test)</td>
+   </tr>
+   <tr>
+      <td>[Checkpoint-1]()</td>
+      <td>70.1</td>
+      <td>68.2</td>
+      <td>65.0</td>
+      <td>64.3</td>
+   </tr>
+   <tr>
+      <td>[Checkpoint-2]()</td>
+      <td>69.1</td>
+      <td>67.1</td>
+      <td>--</td>
+      <td>--</td>
+   </tr>
+</table>-->
+
+### Inference with Model Ensemble
 Decoding with model ensembles. First, list the checkpoint directories of the individual models in [experiment.py](src/experiments.py#L143).
 
 Spider
