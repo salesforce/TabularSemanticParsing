@@ -1,6 +1,6 @@
 # Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing
 
-This is the official code release of the following paper: 
+This is the official code release of the following paper:
 
 Xi Victoria Lin, Richard Socher and Caiming Xiong. [Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing](http://victorialin.net/pubs/bridge-emnlp2020.pdf). Findings of EMNLP 2020.
 
@@ -27,7 +27,7 @@ Our model takes a natural language utterance and a database (schema + field pick
 
 ### Install Dependencies
 
-Our implementation has been tested with Pytorch 1.7 and Cuda 11 with a single GPU.
+Our implementation has been tested using Pytorch 1.7 and Cuda 11.0 with a single GPU.
 ```
 git clone https://github.com/salesforce/TabularSemanticParsing
 cd TabularSemanticParsing
@@ -62,7 +62,7 @@ tar xf data.tar.bz2 -C data && mv data/data data/wikisql1.1
 The processed data will be stored in a separate pickle file. 
 
 ### Train 
-Train the model using the following commands. The checkpoint of the best model will be stored in a directory [named using the current model hyperparameters](https://github.com/salesforce/TabularSemanticParsing/blob/25b154d3dc0e25922822433400c453274d38b8c8/src/data_processor/path_utils.py#L309). 
+Train the model using the following commands. The checkpoint of the best model will be stored in a directory [specified by the hyperparameters](https://github.com/salesforce/TabularSemanticParsing/blob/25b154d3dc0e25922822433400c453274d38b8c8/src/data_processor/path_utils.py#L309) in the configuration file. 
 
 Spider
 ```
@@ -75,7 +75,7 @@ WikiSQL
 ```
 
 ### Inference
-Decode SQL predictions from pre-trained models.
+Decode SQL predictions from pre-trained models. The following commands run inference with the checkpoints stored in the directory specified by the hyperparameters in the configuration file. 
 
 Spider
 ```
@@ -88,10 +88,8 @@ WikiSQL
 ```
 **Note:** 
 1. Add the `--test` flag to the above commands to obtain the test set evaluation results on the corresponding dataset. This flag is invalid for Spider, as its test set is hidden.
-2. Evaluation metrics will be printed out at the end of decoding. The WikiSQL evaluation takes some time because it computes execution accuracy.
-
-#### Using A Specific Checkpoint
-The above commands run inference with the checkpoints stored in the directory specified by the hyperparameters in the configuration file. To use a specific checkpoint, use the `--checkpoint_path [path_to_checkpoint]` flag.
+2. Add the `--checkpoint_path [path_to_checkpoint_tar_file]` flag to decode using a checkpoint that's not stored in the default location.
+3. Evaluation metrics will be printed out at the end of decoding. The WikiSQL evaluation takes some time because it computes execution accuracy.
 
 <!--You can download two of our pre-trained checkpoints for Spider here:
 <table>
