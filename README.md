@@ -6,7 +6,7 @@ Xi Victoria Lin, Richard Socher and Caiming Xiong. [Bridging Textual and Tabular
 
 ## Overview
 
-Cross-Domain tabular semantic parsing is the task of predicting the executable structured query language given a natural language question issued to some database. The model may or may not have seen the target database during training.
+Cross-domain tabular semantic parsing (X-TSP) is the task of predicting the executable structured query language given a natural language question issued to some database. The model may or may not have seen the target database during training.
 
 This library implements 
 - A strong sequence-to-sequence based cross-domain text-to-SQL semantic parser that achieved state-of-the-art performance on two widely used benchmark datasets: [Spider](https://yale-lily.github.io/spider) and [WikiSQL](https://github.com/salesforce/WikiSQL). 
