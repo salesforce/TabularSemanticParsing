@@ -89,8 +89,6 @@ class Text2SQLWrapper(object):
         if schema is not None:
             self.add_schema(schema)
 
-        self.model_ensemble = None
-
         # When generating SQL in execution order, cache reordered SQLs to save time
         if args.process_sql_in_execution_order:
             self.pred_restored_cache = self.semantic_parsers[0].load_pred_restored_cache()
