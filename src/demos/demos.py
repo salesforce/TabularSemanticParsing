@@ -58,7 +58,7 @@ def demo_preprocess(args, example, vocabs=None, schema_graph=None):
 
 
 class Text2SQLWrapper(object):
-    def __init__(self, args, cs_args, schema):
+    def __init__(self, args, cs_args, schema, ensemble_model_dirs=None):
         self.args = args
         self.text_tokenize, _, _, self.tu = tok.get_tokenizers(args)
 
@@ -69,14 +69,31 @@ class Text2SQLWrapper(object):
         self.confusion_span_detector = load_confusion_span_detector(cs_args)
 
         # Text-to-SQL model
-        self.semantic_parser = load_semantic_parser(args)
-        self.semantic_parser.schema_graphs = SchemaGraphs()
+        self.semantic_parsers = []
+        self.model_ensemble = None
+        if ensemble_model_dirs is None:
+            sp = load_semantic_parser(args)
+            sp.schema_graphs = SchemaGraphs()
+            self.semantic_parsers.append(sp)
+        else:
+            sps = [EncoderDecoderLFramework(args) for _ in ensemble_model_dirs]
+            for i, model_dir in enumerate(ensemble_model_dirs):
+                checkpoint_path = os.path.join(model_dir, 'model-best.16.tar')
+                sps[i].schema_graphs = SchemaGraphs()
+                sps[i].load_checkpoint(checkpoint_path)
+                sps[i].cuda()
+                sps[i].eval()
+            self.semantic_parsers = sps
+            self.model_ensemble = [sp.mdl for sp in sps]
+
         if schema is not None:
             self.add_schema(schema)
 
+        self.model_ensemble = None
+
         # When generating SQL in execution order, cache reordered SQLs to save time
         if args.process_sql_in_execution_order:
-            self.pred_restored_cache = self.semantic_parser.load_pred_restored_cache()
+            self.pred_restored_cache = self.semantic_parsers[0].load_pred_restored_cache()
         else:
             self.pred_restored_cache = None
 
@@ -99,8 +116,9 @@ class Text2SQLWrapper(object):
         :return: SQL query corresponding to the input question
         """
         start_time = time.time()
-        output = self.semantic_parser.inference([example], restore_clause_order=self.args.process_sql_in_execution_order,
-                                                pred_restored_cache=self.pred_restored_cache, verbose=False)
+        output = self.semantic_parsers[0].inference([example], restore_clause_order=self.args.process_sql_in_execution_order,
+                                                    pred_restored_cache=self.pred_restored_cache,
+                                                    model_ensemble=self.model_ensemble, verbose=False)
         if len(output['pred_decoded'][0]) > 1:
             pred_sql = output['pred_decoded'][0][0]
         else:
@@ -109,10 +127,10 @@ class Text2SQLWrapper(object):
         return pred_sql
 
     def process(self, text, schema_name, verbose=False):
-        schema = self.semantic_parser.schema_graphs[schema_name]
+        schema = self.semantic_parsers[0].schema_graphs[schema_name]
         start_time = time.time()
         example = data_utils.Text2SQLExample(data_utils.OTHERS, schema.name,
-                                             db_id=self.semantic_parser.schema_graphs.get_db_id(schema.name))
+                                             db_id=self.semantic_parsers[0].schema_graphs.get_db_id(schema.name))
         example.text = text
         demo_preprocess(self.args, example, self.vocabs, schema)
         print('data processing time: {:.2f}s'.format(time.time() - start_time))
@@ -142,11 +160,12 @@ class Text2SQLWrapper(object):
 
     def add_schema(self, schema):
         schema.lexicalize_graph(tokenize=self.text_tokenize)
-        if schema.name not in self.semantic_parser.schema_graphs.db_index:
-            self.semantic_parser.schema_graphs.index_schema_graph(schema)
+        if schema.name not in self.semantic_parsers[0].schema_graphs.db_index:
+            for sp in self.semantic_parsers:
+                sp.schema_graphs.index_schema_graph(schema)
 
     def schema_exists(self, schema_name):
-        return schema_name in self.semantic_parser.schema_graphs.db_index
+        return schema_name in self.semantic_parsers[0].schema_graphs.db_index
 
 
 def demo_table(args, sp):

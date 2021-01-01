@@ -21,6 +21,7 @@ from src.data_processor.path_utils import get_model_dir, get_checkpoint_path
 from src.demos.demos import Text2SQLWrapper
 import src.eval.eval_tools as eval_tools
 from src.eval.wikisql.lib.dbengine import DBEngine
+from src.semantic_parser.ensemble_configs import model_dirs as ensemble_model_dirs
 from src.semantic_parser.learn_framework import EncoderDecoderLFramework
 from src.trans_checker.args import args as cs_args
 import src.utils.utils as utils
@@ -156,46 +157,8 @@ def ensemble():
     else:
         engine = None
 
-    model_dirs = [
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201113-113558.vgs0/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201113-113558.ljap/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201113-115517.51x5/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.1-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201112-185010.0rip/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.1-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201112-185458.gryi/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.1-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201112-184443.ss5p/model-best.16.tar'
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201128-210933.j6ot/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201128-210906.yi82/model-best.16.tar',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201128-210911.1ngi/model-best.16.tar'
-        # 'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111910.c73s',
-        # 'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111910.g965',
-        # 'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111910.o6jm',
-        # 'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111913.hptm'
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093155.gjrk/',
-        # 70.1, 68.2
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093255.vn2k/',
-        # 69.1, 67.1
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-110818.d08k/',
-        # 68.4, 67.5
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093110.a97i/',
-        # 68.3, 66.2
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093153.xf80/',
-        # 68.2, 67.6
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-132607.nj9q/',
-        # 68.2, 67.4
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093309.46gg/',
-        # 67.7, 67.4
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093116.8vxb/',
-        # 67.2, 67.0
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093640.ec17/',
-        # 67.2, 66.4
-        'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093120.3un8/',
-        # 66.7, 66.0
-        # 'model/ensemble_analysis/spider.bridge.lstm.meta.ts.ppl-0.85.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201218-093133.lmya/',
-        # 66.4, 65.8
-    ]
-
-    sps = [EncoderDecoderLFramework(args) for _ in model_dirs]
-    for i, model_dir in enumerate(model_dirs):
+    sps = [EncoderDecoderLFramework(args) for _ in ensemble_model_dirs]
+    for i, model_dir in enumerate(ensemble_model_dirs):
         checkpoint_path = os.path.join(model_dir, 'model-best.16.tar')
         sps[i].schema_graphs = dataset['schema']
         sps[i].load_checkpoint(checkpoint_path)
@@ -216,7 +179,8 @@ def ensemble():
         if newly_cached_size > 0:
             sps[0].save_pred_restored_cache(out_dict['pred_restored_cache'], newly_cached_size)
 
-    out_txt = os.path.join(sps[0].model_dir, 'predictions.ens.{}.{}.{}.{}.txt'.format(args.beam_size, args.bs_alpha, split, len(model_dirs)))
+    out_txt = os.path.join(sps[0].model_dir, 'predictions.ens.{}.{}.{}.{}.txt'.format(
+        args.beam_size, args.bs_alpha, split, len(ensemble_model_dirs)))
     with open(out_txt, 'w') as o_f:
         assert(len(dev_examples) == len(out_dict['pred_decoded']))
         for i, pred_sql in enumerate(out_dict['pred_decoded']):
@@ -243,27 +207,12 @@ def error_analysis(sp):
     sp.schema_graphs = dataset['schema']
     print('{} dev examples loaded'.format(len(dev_examples)))
 
-    model_dirs =  [
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201113-113558.vgs0',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201113-113558.ljap',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201113-115517.51x5',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.1-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201112-185458.gryi',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.1-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201112-185010.0rip',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.1-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201112-184443.ss5p'
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201128-210933.j6ot',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201128-210906.yi82',
-        # 'model/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-400-400-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201128-210911.1ngi'
-        'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111910.c73s',
-        'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111910.g965',
-        'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111910.o6jm',
-        'model/model_analysis/spider.bridge.ppl.2.dn.eo.feat.bert-large-uncased.xavier-1024-384-384-16-2-0.0005-inv-sqr-0.0005-4000-6e-05-inv-sqr-3e-05-4000-0.3-0.3-0.0-0.0-1-8-0.0-0.0-res-0.2-0.0-ff-0.4-0.0.201216-111913.hptm'
-    ]
-    if len(model_dirs) <= 2:
+    if len(ensemble_model_dirs) <= 2:
         print('Needs at least 3 models to perform majority vote')
         sys.exit()
 
     predictions = []
-    for model_dir in model_dirs:
+    for model_dir in ensemble_model_dirs:
         pred_file = os.path.join(model_dir, 'predictions.16.txt')
         with open(pred_file) as f:
             predictions.append([x.strip() for x in f.readlines()])
@@ -392,7 +341,11 @@ def demo(args):
                 break
         schema.load_data_from_spider_json(table)
     schema.pretty_print()
-    t2sql = Text2SQLWrapper(args, cs_args, schema)
+
+    if args.ensemble_inference:
+        t2sql = Text2SQLWrapper(args, cs_args, schema, ensemble_model_dirs=ensemble_model_dirs)
+    else:
+        t2sql = Text2SQLWrapper(args, cs_args, schema)
 
     sys.stdout.write('Enter a natural language question: ')
     sys.stdout.write('> ')
@@ -418,7 +371,7 @@ def demo(args):
 def run_experiment(args):
     if args.process_data:
         process_data()
-    elif args.ensemble_inference:
+    elif args.ensemble_inference and not args.demo:
         get_model_dir(args)
         assert(args.model in ['bridge',
                               'seq2seq',
