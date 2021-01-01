@@ -361,8 +361,20 @@ def process_data():
 
 
 def demo(args):
+    """
+    Interactive command line demo.
+
+    Specify a target database from the Spider dataset and query the database using natural language.
+    The output includes:
+        1. if the input question is translated to the SQL query, return the SQL query
+        2. otherwise, return a confusion span in the question that caused the input to be untranslatable.
+    """
     data_dir = 'data/'
-    db_name = 'pets_1'
+    if args.demo_db is None:
+        print('Error: must specify a database name to proceed')
+        return
+    else:
+        db_name = args.demo_db
     db_path = os.path.join(args.db_dir, db_name, '{}.sqlite'.format(db_name))
     schema = SchemaGraph(db_name, db_path=db_path)
     if db_name == 'covid_19':
@@ -370,6 +382,7 @@ def demo(args):
         in_type = os.path.join(data_dir, db_name, '{}.types'.format(db_name))
         schema.load_data_from_csv_file(in_csv, in_type)
     else:
+        # TODO: currently the demo is configured for the Spider dataset.
         import json
         in_json = os.path.join(args.data_dir, 'tables.json')
         with open(in_json) as f:

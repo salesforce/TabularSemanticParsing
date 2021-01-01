@@ -117,9 +117,6 @@ def get_matched_entries(s, field_values, m_theta=0.85, s_theta=0.85):
                             utils.is_commonword(c_field_value)) and match_score < 1:
                         continue
                     s_match_score = match_score
-                    # print(m_theta, s_theta)
-                    # import pdb
-                    # pdb.set_trace()
                     if match_score >= m_theta and s_match_score >= s_theta:
                         if field_value.isupper() and match_score * s_match_score < 1:
                             continue

@@ -179,9 +179,11 @@ class RNNDecoder(Decoder):
         else:
             return torch.cat(outputs, dim=1), hidden, torch.cat(seq_attn_weights, dim=2)
 
-    def merge_multi_head_attention(self, attn_weights):
-        return attn_weights[:, -1, :, :]
-        # return attn_weights.mean(dim=1)
+    def merge_multi_head_attention(self, attn_weights, use_mean=False):
+        if use_mean:
+            return attn_weights.mean(dim=1)
+        else:
+            return attn_weights[:, -1, :, :]
 
     def get_input_feed(self, input):
         return input

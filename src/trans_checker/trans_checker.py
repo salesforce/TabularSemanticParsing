@@ -115,7 +115,7 @@ class TranslatabilityChecker(nn.Module):
         position_ids = ops.arange_cuda(input_size).unsqueeze(0).expand_as(encoder_input_ids)
         # [CLS] t1 t2 ... [SEP] ...
         # 0     0  0  ...  0    ...
-        seg1_sizes = (encoder_input_ids == bu.sep_id).nonzero()[:, 1].view(batch_size, 2)[:, 0] + 1
+        seg1_sizes = torch.nonzero(encoder_input_ids == bu.sep_id)[:, 1].view(batch_size, 2)[:, 0] + 1
         segment_ids = (position_ids >= seg1_sizes.unsqueeze(1)).long()
         # position_ids = position_ids * (1 - segment_ids) + (self.mdl.max_in_seq_len - 1) * segment_ids
         position_ids = None

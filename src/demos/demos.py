@@ -38,7 +38,11 @@ def load_semantic_parser(args):
 
 def load_confusion_span_detector(args):
     tc = TranslatabilityChecker(args)
-    tc.load_checkpoint(os.path.join(args.model_dir, 'trans_check_0.0001_3e-05', 'model-best.tar'))
+    if args.checkpoint_path is not None:
+        tc.load_checkpoint(args.checkpoint_path)
+    else:
+        print('Warning: translatability checker checkpoint not specified')
+        return None
     tc.cuda()
     tc.eval()
     return tc
@@ -113,7 +117,10 @@ class Text2SQLWrapper(object):
         demo_preprocess(self.args, example, self.vocabs, schema)
         print('data processing time: {:.2f}s'.format(time.time() - start_time))
 
-        translatable, confuse_span, replace_span = self.confusion_span_detection(example)
+        if self.confusion_span_detector:
+            translatable, confuse_span, replace_span = self.confusion_span_detection(example)
+        else:
+            translatable, confuse_span, replace_span = True, None, None
 
         sql_query = None
         if translatable:

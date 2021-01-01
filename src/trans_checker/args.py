@@ -18,6 +18,8 @@ parser.add_argument('--data_dir', type=str, default=os.path.join(code_base_dir, 
                     help='directory where the data is stored (default: None)')
 parser.add_argument('--db_dir', type=str, default=os.path.join(code_base_dir, 'data/spider_ut/database'),
                     help='directory where the database files are stored (default: None)')
+parser.add_argument('--checkpoint_path', type=str, default=None,
+                    help='Path to the translatability checker model checkpoint (default: None)')
 parser.add_argument('--random_field_order', action='store_true',
                     help='If set, use random field order in augmented table schema (default: False).')
 parser.add_argument('--augment_with_wikisql', action='store_true',

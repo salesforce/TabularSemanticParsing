@@ -34,6 +34,8 @@ parser.add_argument('--fine_tune', action='store_true',
                     help='fine tuning model on a given dataset (default: False)')
 parser.add_argument('--demo', action='store_true',
                     help='run interactive commandline demo (default: False)')
+parser.add_argument('--demo_db', type=str, default=None,
+                    help='the database used in the interactive demo')
 parser.add_argument('--data_statistics', action='store_true',
                     help='print dataset statistics (default: False)')
 parser.add_argument('--search_random_seed', action='store_true',
