@@ -117,7 +117,7 @@ WikiSQL
 </table>-->
 
 ### Inference with Model Ensemble
-To decode with model ensemble, first list the checkpoint directories of the individual models in [experiment.py](src/experiments.py#L143), then run the following command(s).
+To decode with model ensemble, first list the checkpoint directories of the individual models in the [ensemble model configuration file](src/semantic_parser/ensemble_configs.py), then run the following command(s).
 
 Spider
 ```
