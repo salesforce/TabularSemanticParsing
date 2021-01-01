@@ -117,7 +117,7 @@ WikiSQL
 </table>-->
 
 ### Inference with Model Ensemble
-Decoding with model ensembles. First, list the checkpoint directories of the individual models in [experiment.py](src/experiments.py#L143).
+To decode with model ensemble, first list the checkpoint directories of the individual models in [experiment.py](src/experiments.py#L143), then run the following command(s).
 
 Spider
 ```
@@ -126,6 +126,14 @@ Spider
 
 ### Hyperparameter Changes
 To change the hyperparameters and other experiment set up, start from the [configuration files](configs).
+
+## Commandline Demo
+You can interact with a pre-trained checkpoint through the commandline using the following commands:
+
+Spider
+```
+./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --demo 0 --demo_db [db_name] --checkpoint_path [path_to_checkpoint_tar_file]
+```
 
 ## Citation
 If you find the resource in this repository helpful, please cite
