@@ -2,7 +2,7 @@
 
 This is the official code release of the following paper:
 
-Xi Victoria Lin, Richard Socher and Caiming Xiong. [Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing](http://victorialin.net/pubs/bridge-emnlp2020.pdf). Findings of EMNLP 2020.
+Xi Victoria Lin, Richard Socher and Caiming Xiong. [Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing](arxiv.org/abs/2012.12627). Findings of EMNLP 2020.
 
 ## Overview
 
