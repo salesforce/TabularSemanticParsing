@@ -20,7 +20,7 @@ The parser can be adapted to learn mappings from text to other structured query 
 
 Our model takes a natural language utterance and a database (schema + field picklists) as input, and generates SQL queries as token sequences. We apply schema-guided decoding and post-processing to make sure the final output is executable.
 - **Preprocessing:** We concatenate the serialized database schema with the utterance to form a tagged sequence. A [fuzzy string matching algorithm](src/common/content_encoder.py) is used to identify picklist items mentioned in the utterance. The mentioned picklist items are appended to the corresponding field name in the tagged sequence.
-- **Translating:** The hybrid sequence is passed through the BRIDGE model, which output raw program sequences with probabitlity scores via beam search.
+- **Translating:** The hybrid sequence is passed through the BRIDGE model, which output raw program sequences with probability scores via beam search.
 - **Postprocessing:** The raw program sequences are passed through a SQL checker, which verifies its syntactical correctness and schema consistency. Sequences that failed to pass the checker are discarded from the output.
 
 ## Quick Start
@@ -43,7 +43,7 @@ export PYTHONPATH = `pwd` && mkdir data
 
 ### Process Data
 
-Spider
+#### Spider
 
 Download the [official data release](https://drive.google.com/u/1/uc?export=download&confirm=pft3&id=1_AckYkinAnhqmRQtGsQgUKAnTHxxX5J0) and unzip the folder. Then manually merge `spider/train_spider.json` with `spider/train_others.json` into a single file `spider/train.json`.
 ```
@@ -51,7 +51,7 @@ mv spider data/
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --process_data 0
 ```
 
-WikiSQL
+#### WikiSQL
 
 Download the [official data release](https://github.com/salesforce/WikiSQL/blob/master/data.tar.bz2).
 ```
@@ -64,12 +64,12 @@ The processed data will be stored in a separate pickle file.
 ### Train 
 Train the model using the following commands. The checkpoint of the best model will be stored in a directory [specified by the hyperparameters](https://github.com/salesforce/TabularSemanticParsing/blob/25b154d3dc0e25922822433400c453274d38b8c8/src/data_processor/path_utils.py#L309) in the configuration file. 
 
-Spider
+#### Spider
 ```
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --train 0
 ```
 
-WikiSQL
+#### WikiSQL
 ```
 ./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --train 0
 ```
@@ -77,12 +77,12 @@ WikiSQL
 ### Inference
 Decode SQL predictions from pre-trained models. The following commands run inference with the checkpoints stored in the directory specified by the hyperparameters in the configuration file. 
 
-Spider
+#### Spider
 ```
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --inference 0
 ```
 
-WikiSQL
+#### WikiSQL
 ```
 ./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --inference 0
 ```
@@ -119,7 +119,7 @@ WikiSQL
 ### Inference with Model Ensemble
 To decode with model ensemble, first list the checkpoint directories of the individual models in the [ensemble model configuration file](src/semantic_parser/ensemble_configs.py), then run the following command(s).
 
-Spider
+#### Spider
 ```
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --ensemble_inference 0
 ```
@@ -130,7 +130,7 @@ To change the hyperparameters and other experiment set up, start from the [confi
 ## Commandline Demo
 You can interact with a pre-trained checkpoint through the commandline using the following commands:
 
-Spider
+#### Spider
 ```
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --demo 0 --demo_db [db_name] --checkpoint_path [path_to_checkpoint_tar_file]
 ```
@@ -140,7 +140,7 @@ If you find the resource in this repository helpful, please cite
 ```
 @inproceedings{LinRX2020:BRIDGE, 
   author = {Xi Victoria Lin and Richard Socher and Caiming Xiong}, 
-  title = {Multi-Hop Knowledge Graph Reasoning with Reward Shaping}, 
+  title = {Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing}, 
   booktitle = {Proceedings of the 2020 Conference on Empirical Methods in Natural
                Language Processing: Findings, {EMNLP} 2020, November 16-20, 2020},
   year = {2020} 
