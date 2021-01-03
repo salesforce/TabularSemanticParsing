@@ -35,7 +35,7 @@ class SchemaLinkingEvaluator(object):
                     num_p_matched += 1
 
             prec = num_p_matched / len(pred_values) if len(pred_values) > 0 else 0
-            recall = num_gt_matched / len(ground_truth_values) if len(ground_truth_values) > 0 else 0
+            recall = num_gt_matched / len(ground_truth_values) if len(ground_truth_values) > 0 else 1
             f1 = 2 * (prec * recall) / (prec + recall) if (prec + recall) > 0 else 0
 
         self.precs.append(prec)

@@ -78,7 +78,7 @@ class TranslatabilityChecker(nn.Module):
 
     def inference(self, dev_data):
         self.eval()
-        batch_size = 32
+        batch_size = min(len(dev_data), 16)
 
         output_spans = []
         for batch_start_id in tqdm(range(0, len(dev_data), batch_size)):
@@ -93,7 +93,7 @@ class TranslatabilityChecker(nn.Module):
             end_logit = output[:, 1, :]
             # [batch_size, encoder_seq_len, encoder_seq_len]
             span_logit = start_logit.unsqueeze(2) + end_logit.unsqueeze(1)
-            valid_span_pos = ops.ones_var_cuda([batch_size, encoder_seq_len, encoder_seq_len]).triu()
+            valid_span_pos = ops.ones_var_cuda([len(span_logit), encoder_seq_len, encoder_seq_len]).triu()
             span_logit = span_logit - (1 - valid_span_pos) * ops.HUGE_INT
 
             for i in range(len(mini_batch)):
@@ -172,7 +172,7 @@ def train(train_data, dev_data):
     wandb.watch(trans_checker)
 
     # Hyperparameters
-    batch_size = 16
+    batch_size = min(len(train_data), 16)
     num_peek_epochs = 1
 
     # Loss function
@@ -371,8 +371,12 @@ def get_wandb_tag(args):
 
 
 if __name__ == '__main__':
-    run_train()
-    # run_inference()
+    if args.train:
+        run_train()
+    elif args.inference:
+        run_inference()
+    else:
+        raise NotImplementedError
 
 
 

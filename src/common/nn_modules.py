@@ -519,7 +519,6 @@ class RelationalAttentionSingleHead(nn.Module):
         base_attn_vec = torch.matmul(attn_weights, value)
         r_attn_vec = torch.matmul(attn_weights.unsqueeze(2), r_v_M).squeeze(2)
         attn_vec = base_attn_vec + r_attn_vec
-        attn_vec = base_attn_vec
         return attn_vec, attn_weights
 
 

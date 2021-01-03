@@ -12,6 +12,11 @@ code_base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__f
 
 parser = argparse.ArgumentParser(description='Question Translatability Checker')
 
+parser.add_argument('--train', action='store_true',
+                    help='run model training (default: False)')
+parser.add_argument('--inference', action='store_true',
+                    help='run inference (default: False)')
+
 parser.add_argument('--dataset_name', type=str, default='spider_ut',
                     help='name of dataset (default: spider_ut)')
 parser.add_argument('--data_dir', type=str, default=os.path.join(code_base_dir, 'data/spider_ut'),
@@ -26,11 +31,11 @@ parser.add_argument('--augment_with_wikisql', action='store_true',
                     help='If set, augment training data with WikiSQL (default: False)')
 parser.add_argument('--model_dir', type=str, default=os.path.join(code_base_dir, 'model'),
                     help='directory where the model parameters are stored (default: None)')
-parser.add_argument('--pretrained_transformer', type=str, default='bert-base-uncased',
+parser.add_argument('--pretrained_transformer', type=str, default='bert-large-uncased',
                     help='Specify pretrained transformer model to use.')
 parser.add_argument('--pretrained_lm_dropout_rate', type=float, default=0.3,
                     help='Pretrained LM features dropout rate (default: 0.0)')
-parser.add_argument('--encoder_input_dim', type=int, default=768,
+parser.add_argument('--encoder_input_dim', type=int, default=1024,
                     help='Encoder input dimension (default: 200)')
 parser.add_argument('--encoder_hidden_dim', type=int, default=-1,
                     help='Encoder hidden dimension (default to encoder input dimension)')

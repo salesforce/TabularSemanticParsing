@@ -346,7 +346,7 @@ def eval_prediction(pred, gt_list, dataset_id, db_name=None, in_execution_order=
                 pred, [(gt, db_name) for gt in gt_list], in_execution_order=in_execution_order)
         except Exception as e:
             print(str(e))
-            return False
+            return False, 'easy', 0
     elif dataset_id == WIKISQL:
         assert(len(gt_list) == 1)
         gt = {'sql': gt_list[0], 'table_id': db_name}
