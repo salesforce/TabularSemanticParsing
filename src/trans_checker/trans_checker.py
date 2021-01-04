@@ -63,6 +63,7 @@ class TranslatabilityChecker(nn.Module):
         self.transformer_encoder = TransformerHiddens(self.pretrained_transformer, dropout=self.pretrained_lm_dropout,
                                                       requires_grad=True)
         self.encoder_hidden_dim = args.encoder_hidden_dim if args.encoder_hidden_dim > 0 else args.encoder_input_dim
+        self.translatability_pred = nn.Sequential(nn.Linear(self.encoder_hidden_dim, 1), nn.Sigmoid())
         self.span_extractor = SpanExtractor(self.encoder_hidden_dim)
 
     def forward(self, input_ids, text_masks):
@@ -73,24 +74,26 @@ class TranslatabilityChecker(nn.Module):
                                                       segments=segment_ids, position_ids=position_ids)
         text_masks = torch.cat([ops.zeros_var_cuda([batch_size, 1]), text_masks.float()], dim=1)
         text_embedded = inputs_embedded[:, :text_masks.size(1), :]
-        output = self.span_extractor(text_embedded, text_masks)
-        return output
+        output = self.translatability_pred(text_embedded[:, 0, :])
+        span_extractor_output = self.span_extractor(text_embedded, text_masks)
+        return output, span_extractor_output
 
     def inference(self, dev_data):
         self.eval()
         batch_size = min(len(dev_data), 16)
 
-        output_spans = []
+        outputs, output_spans = [], []
         for batch_start_id in tqdm(range(0, len(dev_data), batch_size)):
             mini_batch = dev_data[batch_start_id: batch_start_id + batch_size]
             _, text_masks = ops.pad_batch([exp.text_ids for exp in mini_batch], bu.pad_id)
             encoder_input_ids = ops.pad_batch([exp.ptr_input_ids for exp in mini_batch], bu.pad_id)
             # [batch_size, 2, encoder_seq_len]
-            output = self.forward(encoder_input_ids, text_masks)
-            encoder_seq_len = output.size(2)
+            output, span_extract_output = self.forward(encoder_input_ids, text_masks)
+            outputs.append(output)
+            encoder_seq_len = span_extract_output.size(2)
             # [batch_size, encoder_seq_len]
-            start_logit = output[:, 0, :]
-            end_logit = output[:, 1, :]
+            start_logit = span_extract_output[:, 0, :]
+            end_logit = span_extract_output[:, 1, :]
             # [batch_size, encoder_seq_len, encoder_seq_len]
             span_logit = start_logit.unsqueeze(2) + end_logit.unsqueeze(1)
             valid_span_pos = ops.ones_var_cuda([len(span_logit), encoder_seq_len, encoder_seq_len]).triu()
@@ -101,14 +104,7 @@ class TranslatabilityChecker(nn.Module):
                 start = int(span_pos / encoder_seq_len)
                 end = int(span_pos % encoder_seq_len)
                 output_spans.append((start, end))
-                # print(start, end)
-                # print(mini_batch[i].text)
-                # confusion_span_size = end - start + 1
-                # if start > 0 and confusion_span_size < 5:
-                #     print(mini_batch[i].text_tokens[start-1:end])
-                #     print()
-
-        return output_spans
+        return torch.cat(outputs), output_spans
 
     def get_segment_and_position_ids(self, encoder_input_ids):
         batch_size, input_size = encoder_input_ids.size()
@@ -172,12 +168,13 @@ def train(train_data, dev_data):
     wandb.watch(trans_checker)
 
     # Hyperparameters
-    batch_size = min(len(train_data), 16)
+    batch_size = min(len(train_data), 12)
     num_peek_epochs = 1
 
     # Loss function
-    # -100 is a dummy padding value since all output spans will be of length 2
-    loss_fun = MaskedCrossEntropyLoss(-100)
+    loss_fun = nn.BCELoss()
+    span_extract_pad_id = -100
+    span_extract_loss_fun = MaskedCrossEntropyLoss(span_extract_pad_id)
 
     # Optimizer
     optimizer = optim.Adam(
@@ -203,9 +200,14 @@ def train(train_data, dev_data):
             mini_batch = train_data[i : i + batch_size]
             _, text_masks = ops.pad_batch([exp.text_ids for exp in mini_batch], bu.pad_id)
             encoder_input_ids = ops.pad_batch([exp.ptr_input_ids for exp in mini_batch], bu.pad_id)
+            target_ids = ops.int_var_cuda([1 if exp.span_ids[0] == 0 else 0 for exp in mini_batch])
             target_span_ids, _ = ops.pad_batch([exp.span_ids for exp in mini_batch], bu.pad_id)
-            output = trans_checker(encoder_input_ids, text_masks)
-            loss = loss_fun(output, target_span_ids)
+            target_span_ids = target_span_ids * (1 - target_ids.unsqueeze(1)) + \
+                              target_ids.unsqueeze(1).expand_as(target_span_ids) * span_extract_pad_id
+            output, span_extract_output = trans_checker(encoder_input_ids, text_masks)
+            loss = loss_fun(output, target_ids.unsqueeze(1).float())
+            span_extract_loss = span_extract_loss_fun(span_extract_output, target_span_ids)
+            loss += span_extract_loss
             loss.backward()
             epoch_losses.append(float(loss))
 
@@ -215,27 +217,28 @@ def train(train_data, dev_data):
             optimizer.step()
             optimizer.zero_grad()
 
-        if args.num_epochs % num_peek_epochs == 0:
-            stdout_msg = 'Epoch {}: average training loss = {}'.format(epoch_id, np.mean(epoch_losses))
-            print(stdout_msg)
-            wandb.log({'cross_entropy_loss/{}'.format(args.dataset_name): np.mean(epoch_losses)})
-            pred_spans = trans_checker.inference(dev_data)
-            target_spans = [exp.span_ids for exp in dev_data]
-            trans_acc = translatablity_eval(pred_spans, target_spans)
-            print('Dev translatability accuracy = {}'.format(trans_acc))
-            if trans_acc > best_dev_metrics:
-                model_path = os.path.join(model_dir, 'model-best.tar')
-                trans_checker.save_checkpoint(optimizer, lr_scheduler, model_path)
-                best_dev_metrics = trans_acc
-
-            span_acc, prec, recall, f1 = span_eval(pred_spans, target_spans)
-            print('Dev span accuracy = {}'.format(span_acc))
-            print('Dev span precision = {}'.format(prec))
-            print('Dev span recall = {}'.format(recall))
-            print('Dev span F1 = {}'.format(f1))
-            wandb.log({'translatability_accuracy/{}'.format(args.dataset_name): trans_acc})
-            wandb.log({'span_accuracy/{}'.format(args.dataset_name): span_acc})
-            wandb.log({'span_f1/{}'.format(args.dataset_name): f1})
+        with torch.no_grad():
+            if args.num_epochs % num_peek_epochs == 0:
+                stdout_msg = 'Epoch {}: average training loss = {}'.format(epoch_id, np.mean(epoch_losses))
+                print(stdout_msg)
+                wandb.log({'cross_entropy_loss/{}'.format(args.dataset_name): np.mean(epoch_losses)})
+                pred_trans, pred_spans = trans_checker.inference(dev_data)
+                targets = [1 if exp.span_ids[0] == 0 else 0 for exp in dev_data]
+                target_spans = [exp.span_ids for exp in dev_data]
+                trans_acc = translatablity_eval(pred_trans, targets)
+                print('Dev translatability accuracy = {}'.format(trans_acc))
+                if trans_acc > best_dev_metrics:
+                    model_path = os.path.join(model_dir, 'model-best.tar')
+                    trans_checker.save_checkpoint(optimizer, lr_scheduler, model_path)
+                    best_dev_metrics = trans_acc
+                span_acc, prec, recall, f1 = span_eval(pred_spans, target_spans)
+                print('Dev span accuracy = {}'.format(span_acc))
+                print('Dev span precision = {}'.format(prec))
+                print('Dev span recall = {}'.format(recall))
+                print('Dev span F1 = {}'.format(f1))
+                wandb.log({'translatability_accuracy/{}'.format(args.dataset_name): trans_acc})
+                wandb.log({'span_accuracy/{}'.format(args.dataset_name): span_acc})
+                wandb.log({'span_f1/{}'.format(args.dataset_name): f1})
 
 
 def run_inference():
@@ -252,10 +255,11 @@ def run_inference():
     trans_checker.cuda()
     trans_checker.eval()
 
-    with torch.set_grad_enabled(False):
-        pred_spans = trans_checker.inference(dev_data)
+    with torch.no_grad():
+        pred_trans, pred_spans = trans_checker.inference(dev_data)
+        targets = [1 if exp.span_ids[0] == 0 else 0 for exp in dev_data]
         target_spans = [exp.span_ids for exp in dev_data]
-        trans_acc = translatablity_eval(pred_spans, target_spans)
+        trans_acc = translatablity_eval(pred_trans, targets)
         print('Dev translatability accuracy = {}'.format(trans_acc))
         span_acc, prec, recall, f1 = span_eval(pred_spans, target_spans)
         print('Dev span accuracy = {}'.format(span_acc))
@@ -312,7 +316,10 @@ def load_data(args):
 
     schema_graphs = load_schema_graphs(args)
     schema_graphs.lexicalize_graphs(tokenize=text_tokenize, normalized=True)
-    train_data = load_split(train_json)
+    if args.train:
+        train_data = load_split(train_json)
+    else:
+        train_data = None
     dev_data = load_split(dev_json)
     dataset = dict()
     dataset['train'] = train_data
@@ -321,15 +328,15 @@ def load_data(args):
     return dataset
 
 
-def translatablity_eval(pred_spans, gt_spans):
-    assert(len(pred_spans) == len(gt_spans))
+def translatablity_eval(pred_trans, targets):
+    thresh = 0.5
+    assert(len(pred_trans) == len(targets))
     num_correct = 0
-    for i, (pred_span, gt_span) in enumerate(zip(pred_spans, gt_spans)):
-        if pred_span[0] == 0 and gt_span[0] == 0:
+    for i, (pred_tran, target) in enumerate(zip(pred_trans, targets)):
+        pred_tran_bi = int(pred_tran > thresh)
+        if pred_tran_bi == target:
             num_correct += 1
-        if pred_span[0] > 0 and gt_span[0] > 0:
-            num_correct += 1
-    return num_correct / len(pred_spans)
+    return num_correct / len(pred_trans)
 
 
 def span_eval(pred_spans, gt_spans):
