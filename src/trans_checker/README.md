@@ -3,6 +3,29 @@
 This directory contains the implementation of the question translatability checker described in section 3.2.1 of the paper 
 [Photon: A Robust Cross-Domain Text-to-SQL System](https://arxiv.org/abs/2007.15280). Zeng et al. ACL System Demonstration 2020.
 
+## QuickStart
+
+### Download UTran-SQL (Spider) Dataset
+
+Download the Spider section of the UTran-SQL dataset [here](https://drive.google.com/file/d/1gKqaEqbegPRzFt2lDigJiKG7bPZU6uU7/view?usp=sharing) and place it under the data directory.
+```
+unzip spider_ut.zip
+mv spider_ut.zip ../../data
+```
+
+### Train Untranslatable Question Detector
+```
+python3 trans_checker.py --train --gpu 0
+```
+
+### Inference
+```
+python3 trans_checker.py --inference --gpu 0
+```
+
+### Hyperparameter Changes
+You can change the hyperparameters of the model in the [configuration file](args.py).
+
 ## Citation
 If you find the code helpful, please cite
 ```

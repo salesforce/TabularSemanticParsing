@@ -144,8 +144,7 @@ def load_schema_graphs(args):
     dataset_name = args.dataset_name
     if dataset_name in ['spider', 'spider_ut']:
         return load_schema_graphs_spider(args.data_dir, dataset_name, db_dir=args.db_dir,
-                                         augment_with_wikisql=args.augment_with_wikisql,
-                                         random_field_order=args.random_field_order)
+                                         augment_with_wikisql=args.augment_with_wikisql)
     if dataset_name == 'wikisql':
         return load_schema_graphs_wikisql(args.data_dir)
 
