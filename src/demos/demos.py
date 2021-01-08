@@ -97,15 +97,20 @@ class Text2SQLWrapper(object):
 
     def confusion_span_detection(self, example):
         text_tokens = example.text_tokens
-        confusion_span = self.confusion_span_detector.inference([example])
+        trans_pred, confusion_span = self.confusion_span_detector.inference([example])
+        # TODO: current implementation handles one input request a time
+        trans_pred = float(trans_pred[0])
         confusion_span = confusion_span[0]
-        if confusion_span[0] == 0:
+        trans_thresh = 1e-7
+        translatable = (trans_pred > trans_thresh) and len(example.text) > 8
+        if translatable:
             return True, None, None
         else:
             if confusion_span[1] - confusion_span[0] + 1 >= 5:
                 return False, None, None
             else:
-                confuse_span = self.tu.tokenizer.convert_tokens_to_string(text_tokens[confusion_span[0] - 1 : confusion_span[1]])
+                confuse_span = self.tu.tokenizer.convert_tokens_to_string(
+                    text_tokens[confusion_span[0] - 1: confusion_span[1]])
                 return False, confuse_span, None
 
     def translate(self, example):
