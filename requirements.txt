@@ -17,3 +17,6 @@ records
 babel
 tabulate
 scipy
+
+# demo use only
+sqlalchemy==1.3.20
