@@ -89,7 +89,7 @@ def get_matched_entries(s, field_values, m_theta=0.85, s_theta=0.85):
 
     matched = dict()
     for field_value in field_values:
-        if utils.is_number(field_value):
+        if not isinstance(field_value, string_types):
             continue
         fv_tokens = split(field_value)
         sm = difflib.SequenceMatcher(None, n_grams, fv_tokens)

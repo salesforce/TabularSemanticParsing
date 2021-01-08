@@ -18,6 +18,7 @@ import numpy as np
 np.random.seed(100)
 import random
 import scipy.sparse as ssp
+import sqlalchemy
 import sqlite3
 
 import src.common.ops as ops
@@ -408,7 +409,7 @@ class SchemaGraph(object):
                             table_features.extend(ref_node.get_serialization(tu, with_table=True))
                 if use_picklist:
                     picklist = self.get_field_picklist(field_id)
-                    if picklist and not utils.is_number(picklist[0]):
+                    if picklist and isinstance(picklist[0], string_types):
                         key = (question_encoding, table_node.name, field_node.name)
                         if key in self.question_field_match_cache:
                             matches = self.question_field_match_cache[key]
