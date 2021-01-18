@@ -55,6 +55,7 @@ mv spider data/
 
 Download the [official data release](https://github.com/salesforce/WikiSQL/blob/master/data.tar.bz2).
 ```
+wget https://github.com/salesforce/WikiSQL/raw/master/data.tar.bz2
 tar xf data.tar.bz2 -C data && mv data/data data/wikisql1.1
 ./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --process_data 0
 ```
