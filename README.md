@@ -85,7 +85,7 @@ Decode SQL predictions from pre-trained models. The following commands run infer
 
 #### WikiSQL
 ```
-./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --inference 0
+./experiment-bridge.sh configs/bridge/wikisql-bridge-bert-large.sh --inference 0
 ```
 **Note:** 
 1. Add the `--test` flag to the above commands to obtain the test set evaluation results on the corresponding dataset. This flag is invalid for Spider, as its test set is hidden.
