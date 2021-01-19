@@ -38,7 +38,7 @@ python3 -m pip install -r requirements.txt
 
 ### Set up Environment
 ```
-export PYTHONPATH = `pwd` && mkdir data
+export PYTHONPATH=`pwd` && mkdir data
 ```
 
 ### Process Data
@@ -57,7 +57,7 @@ Download the [official data release](https://github.com/salesforce/WikiSQL/blob/
 ```
 wget https://github.com/salesforce/WikiSQL/raw/master/data.tar.bz2
 tar xf data.tar.bz2 -C data && mv data/data data/wikisql1.1
-./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --process_data 0
+./experiment-bridge.sh configs/bridge/wikisql-bridge-bert-large.sh --process_data 0
 ```
 
 The processed data will be stored in a separate pickle file. 
@@ -72,7 +72,7 @@ Train the model using the following commands. The checkpoint of the best model w
 
 #### WikiSQL
 ```
-./experiment-brdige.sh configs/bridge/wikisql-bridge-bert-large.sh --train 0
+./experiment-bridge.sh configs/bridge/wikisql-bridge-bert-large.sh --train 0
 ```
 
 ### Inference
