@@ -67,7 +67,7 @@ class Node(object):
         self.node_type = node_type
         self.name = name
         self.normalized_name = n_name if n_name else name
-        self.indexable_name = to_indexable(name, caseless)
+        self.indexable_name = utils.to_indexable(name, caseless)
         self.lexical_features = None
 
     def compute_lexical_features(self, tokenize=None, normalized=False):
@@ -247,11 +247,11 @@ class SchemaGraph(object):
 
 
     def get_table_id(self, signature):
-        signature = to_indexable(signature, self.caseless)
+        signature = utils.to_indexable(signature, self.caseless)
         return self.table_index.get(signature, None)
 
     def get_field_id(self, signature):
-        signature = to_indexable(signature, self.caseless)
+        signature = utils.to_indexable(signature, self.caseless)
         return self.field_index.get(signature, None)
 
     def get_table(self, table_id):
@@ -272,13 +272,14 @@ class SchemaGraph(object):
         return self.field_rev_index[field_id].signature
 
     def is_table_name(self, name):
-        return to_indexable(name, self.caseless) in self.table_names
+        return utils.to_indexable(name, self.caseless) in self.table_names
 
     def is_field_name(self, name):
-        return to_indexable(name, self.caseless) in self.field_names
+        return utils.to_indexable(name, self.caseless) in self.field_names
 
     def field_in_table(self, f_name, t_name):
-        indexable_signature = '{}.{}'.format(to_indexable(t_name, self.caseless), to_indexable(f_name, self.caseless))
+        indexable_signature = '{}.{}'.format(utils.to_indexable(t_name, self.caseless),
+                                             utils.to_indexable(f_name, self.caseless))
         return indexable_signature in self.field_index
 
     def get_foreign_keys_between_tables(self, tn1, tn2):
@@ -312,7 +313,7 @@ class SchemaGraph(object):
     def get_schema_pos(self, signature):
         if signature == '*':
             return 0
-        signature = to_indexable(signature, self.caseless)
+        signature = utils.to_indexable(signature, self.caseless)
         # print(signature, self.bert_feature_idx.get(signature, None))
         return self.bert_feature_idx.get(signature, None)
 
@@ -861,10 +862,10 @@ class SchemaGraph(object):
         self.create_adjacency_matrix()
 
     def indexed_table(self, signature):
-        return to_indexable(signature, self.caseless) in self.table_index
+        return utils.to_indexable(signature, self.caseless) in self.table_index
 
     def indexed_field(self, signature):
-        return to_indexable(signature, self.caseless) in self.field_index
+        return utils.to_indexable(signature, self.caseless) in self.field_index
 
     def index_table(self, node):
         t_id = len(self.table_index)
@@ -1096,53 +1097,5 @@ def sqlalchemy_type_to_string(t):
         return 'boolean'
     else:
         return 'others'
-
-
-def to_indexable(s, caseless=True):
-    """
-    Normalize table and column surface form to facilitate matching.
-    """
-    """replace_list = [
-        ('crs', 'course'),
-        ('mgr', 'manager')
-    ]
-
-    check_replace_list = {
-        'stu': 'student',
-        'prof': 'professor',
-        'res': 'restaurant',
-        'cust': 'customer',
-        'ref': 'reference',
-        'dept': 'department',
-        'emp': 'employee'
-    }
-
-    def to_indexable_name(name):
-        name = name.strip().lower()
-        tokens = name.split()
-        if tokens:
-            tokens = functools.reduce(lambda x, y: x + y, [token.split('_') for token in tokens])
-        else:
-            if verbose:
-                print('Warning: name is an empty string')
-        for i, token in enumerate(tokens):
-            if token in check_replace_list:
-                tokens[i] = check_replace_list[token]
-
-        n_name = ''.join(tokens)
-
-        for s1, s2 in replace_list:
-            n_name = n_name.replace(s1, s2)
-        return n_name
-
-    if '.' in s:
-        s1, s2 = s.split('.', 1)
-        return to_indexable_name(s1) + '.' + to_indexable_name(s2)
-    else:
-        return to_indexable_name(s)
-    """
-    if caseless:
-        s = s.lower()
-    return ''.join(s.replace('_', '').split())
 
 

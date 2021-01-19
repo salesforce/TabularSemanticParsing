@@ -42,7 +42,7 @@ class TableExtractor(object):
 
     @debug_wrapper
     def record_table(self, table_name):
-        table_name = self.schema.to_indexable(table_name)
+        table_name = utils.to_indexable(table_name)
         self.tables.append(table_name)
 
     @debug_wrapper

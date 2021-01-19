@@ -104,6 +104,73 @@ def remove_parentheses_str(s):
     return re.sub(r'\([^)]*\)', '', s).strip()
 
 
+def strip_quotes(s):
+    start = 0
+    while start < len(s):
+        if s[start] in ['"', '\'']:
+            start += 1
+        else:
+            break
+    end = len(s)
+    while end > start:
+        if s[end-1] in ['"', '\'']:
+            end -= 1
+        else:
+            break
+    if start == end:
+        return ''
+    else:
+        return s[start:end]
+
+
+def to_indexable(s, caseless=True):
+    """
+    Normalize table and column surface form to facilitate matching.
+    """
+    """replace_list = [
+        ('crs', 'course'),
+        ('mgr', 'manager')
+    ]
+
+    check_replace_list = {
+        'stu': 'student',
+        'prof': 'professor',
+        'res': 'restaurant',
+        'cust': 'customer',
+        'ref': 'reference',
+        'dept': 'department',
+        'emp': 'employee'
+    }
+
+    def to_indexable_name(name):
+        name = name.strip().lower()
+        tokens = name.split()
+        if tokens:
+            tokens = functools.reduce(lambda x, y: x + y, [token.split('_') for token in tokens])
+        else:
+            if verbose:
+                print('Warning: name is an empty string')
+        for i, token in enumerate(tokens):
+            if token in check_replace_list:
+                tokens[i] = check_replace_list[token]
+
+        n_name = ''.join(tokens)
+
+        for s1, s2 in replace_list:
+            n_name = n_name.replace(s1, s2)
+        return n_name
+
+    if '.' in s:
+        s1, s2 = s.split('.', 1)
+        return to_indexable_name(s1) + '.' + to_indexable_name(s2)
+    else:
+        return to_indexable_name(s)
+    """
+    if caseless:
+        s = s.lower()
+    return ''.join(s.replace('_', '').split())
+
+
 def restore_feature_case(features, s, bu):
     tokens, starts, ends  = [], [], []
 
@@ -177,25 +244,6 @@ def get_random_tag(k=6):
 
 def get_time_tag():
     return datetime.datetime.now().strftime('%y%m%d-%H%M%S')
-
-
-def strip_quotes(s):
-    start = 0
-    while start < len(s):
-        if s[start] in ['"', '\'']:
-            start += 1
-        else:
-            break
-    end = len(s)
-    while end > start:
-        if s[end-1] in ['"', '\'']:
-            end -= 1
-        else:
-            break
-    if start == end:
-        return ''
-    else:
-        return s[start:end]
 
 
 # --- other utilities --- #
