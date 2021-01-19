@@ -360,7 +360,9 @@ class EncoderDecoderLFramework(LFramework):
                     if exp.gt_table_names_list:
                         gt_tables = set([schema_graph.get_table_id(t_name) for t_name in exp.gt_table_names])
                     else:
-                        gt_tables = []
+                        gt_table_names = [token for token, t in
+                                          zip(exp.program_singleton_field_tokens, exp.program_singleton_field_token_types) if t == 0]
+                        gt_tables = set([schema_graph.get_table_id(t_name) for t_name in gt_table_names])
                     # Hack: Baseball database has a complex schema which does not fit the input size of BERT. We select
                     # the ground truth tables and randomly add a few other tables for training.
                     if schema_graph.name.startswith('baseball'):
