@@ -17,6 +17,7 @@ from mo_future import string_types, text
 from moz_sp.debugs import debug_wrapper
 from moz_sp.keywords import join_keywords
 import moz_sp.utils as utils
+from src.utils.utils import to_indexable
 
 
 def remove_redundancy(l):
@@ -42,7 +43,7 @@ class TableExtractor(object):
 
     @debug_wrapper
     def record_table(self, table_name):
-        table_name = utils.to_indexable(table_name)
+        table_name = to_indexable(table_name)
         self.tables.append(table_name)
 
     @debug_wrapper
