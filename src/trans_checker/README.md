@@ -29,24 +29,27 @@ You can change the hyperparameters of the model in the [configuration file](args
 ## Citation
 If you find the code helpful, please cite
 ```
-@inproceedings{DBLP:conf/emnlp/LinSX20,
-  author    = {Xi Victoria Lin and
+@inproceedings{DBLP:conf/acl/ZengLHSXLK20,
+  author    = {Jichuan Zeng and
+               Xi Victoria Lin and
+               Steven C. H. Hoi and
                Richard Socher and
-               Caiming Xiong},
-  editor    = {Trevor Cohn and
-               Yulan He and
-               Yang Liu},
-  title     = {Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic
-               Parsing},
-  booktitle = {Proceedings of the 2020 Conference on Empirical Methods in Natural
-               Language Processing: Findings, {EMNLP} 2020, Online Event, 16-20 November
+               Caiming Xiong and
+               Michael R. Lyu and
+               Irwin King},
+  editor    = {Asli {\c{C}}elikyilmaz and
+               Tsung{-}Hsien Wen},
+  title     = {Photon: {A} Robust Cross-Domain Text-to-SQL System},
+  booktitle = {Proceedings of the 58th Annual Meeting of the Association for Computational
+               Linguistics: System Demonstrations, {ACL} 2020, Online, July 5-10,
                2020},
-  pages     = {4870--4888},
+  pages     = {204--214},
   publisher = {Association for Computational Linguistics},
   year      = {2020},
-  url       = {https://www.aclweb.org/anthology/2020.findings-emnlp.438/},
-  timestamp = {Thu, 12 Nov 2020 17:18:16 +0100},
-  biburl    = {https://dblp.org/rec/conf/emnlp/LinSX20.bib},
+  url       = {https://doi.org/10.18653/v1/2020.acl-demos.24},
+  doi       = {10.18653/v1/2020.acl-demos.24},
+  timestamp = {Fri, 08 Jan 2021 21:20:19 +0100},
+  biburl    = {https://dblp.org/rec/conf/acl/ZengLHSXLK20.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 ```
