@@ -38,7 +38,7 @@ python3 -m pip install -r requirements.txt
 
 ### Set up Environment
 ```
-export PYTHONPATH=`pwd` && mkdir data
+export PYTHONPATH=`pwd` && mkdir data && python -m nltk.downloader punkt
 ```
 
 ### Process Data
