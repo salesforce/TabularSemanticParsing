@@ -222,6 +222,8 @@ class EncoderDecoderLFramework(LFramework):
                                                 pred_restored_cache[db_name] = dict()
                                             pred_restored_cache[db_name][pred_sql] = restored_pred, grammatical, \
                                                                                      schema_consistent
+                                    if check_schema_consistency_ and not schema_consistent:
+                                        restored_pred = None
                                     pred_sql = restored_pred
                                 else:
                                     if check_schema_consistency_:
