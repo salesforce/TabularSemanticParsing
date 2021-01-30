@@ -210,24 +210,23 @@ class EncoderDecoderLFramework(LFramework):
                                 if restore_clause_order:
                                     if pred_restored_cache and db_name in pred_restored_cache and \
                                             pred_sql in pred_restored_cache[db_name]:
-                                        restored_pred = pred_restored_cache[db_name][pred_sql]
+                                        restored_pred, grammatical, schema_consistent = pred_restored_cache[db_name][pred_sql]
                                     else:
-                                        restored_pred = moz_sp.restore_clause_order(
+                                        restored_pred, grammatical, schema_consistent = moz_sp.restore_clause_order(
                                             pred_sql, schema, check_schema_consistency_=check_schema_consistency_,
                                             verbose=verbose)
-                                        if pred_restored_cache:
+                                        if pred_restored_cache and check_schema_consistency_:
+                                            # TODO: we don't cache the results when check_schema_consistency_ is off to
+                                            # avoid logging false negatives
                                             if db_name not in pred_restored_cache:
                                                 pred_restored_cache[db_name] = dict()
-                                            pred_restored_cache[db_name][pred_sql] = restored_pred
-                                    if restored_pred:
-                                        pred_sql = restored_pred
-                                    else:
-                                        pred_sql = None
+                                            pred_restored_cache[db_name][pred_sql] = restored_pred, grammatical, \
+                                                                                     schema_consistent
+                                    pred_sql = restored_pred
                                 else:
                                     if check_schema_consistency_:
                                         if not moz_sp.check_schema_consistency(
-                                                pred_sql, schema,
-                                                in_execution_order=self.args.process_sql_in_execution_order):
+                                                pred_sql, schema, in_execution_order=self.args.process_sql_in_execution_order):
                                             pred_sql = None
                                 if pred_sql and self.args.execution_guided_decoding:
                                     assert(engine is not None)
