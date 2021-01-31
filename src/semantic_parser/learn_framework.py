@@ -139,10 +139,6 @@ class EncoderDecoderLFramework(LFramework):
 
     def inference(self, examples, decode_str_output=True, restore_clause_order=False, pred_restored_cache=None,
                   check_schema_consistency_=True, engine=None, inline_eval=False, model_ensemble=None, verbose=False):
-
-        def get_default_prediction(schema):
-            return 'SELECT * FROM {}'.format(schema.table_rev_index[0].name)
-
         # sanity check
         if self.args.leaderboard_submission or self.args.demo:
             assert (not verbose and not inline_eval and not self.args.use_oracle_tables)
@@ -276,7 +272,7 @@ class EncoderDecoderLFramework(LFramework):
                             #     import sys
                             #     sys.exit()
                     if not pred_decoded_list[-1] and not self.args.demo:
-                        pred_decoded_list[-1].append(get_default_prediction(schema))
+                        pred_decoded_list[-1].append(self.get_default_prediction(schema))
                         pred_decoded_score_list[-1].append(-ops.HUGE_INT)
 
         out_dict = dict()
@@ -517,6 +513,12 @@ class EncoderDecoderLFramework(LFramework):
                 return output_str, text_ptr_weights_vis
         else:
             return output_str,
+
+    def get_dummy_prediction(self, schema):
+        """
+        Return
+        """
+        return 'SELECT * FROM {}'.format(schema.table_rev_index[0].name)
 
     def de_vectorize(self, p_cpu, out_vocab, input_ptr_values, schema=None, table_po=None, field_po=None,
                      return_tokens=False):
