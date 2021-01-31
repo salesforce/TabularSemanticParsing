@@ -241,6 +241,8 @@ class EncoderDecoderLFramework(LFramework):
                                         pred_sql = None
                             else:
                                 pred_sql = None
+                            if not pred_sql:
+                                pred_sql = self.get_default_prediction(schema)
                             if pred_sql:
                                 exp_output_strs.append(pred_sql)
                                 exp_output_scores.append(float(pred_scores[beam_id]))
