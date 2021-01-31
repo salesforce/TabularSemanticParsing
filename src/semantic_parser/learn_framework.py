@@ -519,7 +519,7 @@ class EncoderDecoderLFramework(LFramework):
 
     def get_dummy_prediction(self, schema):
         """
-        Return
+        Return a dummy SQL query given a specific database.
         """
         return 'SELECT * FROM {}'.format(schema.table_rev_index[0].name)
 
