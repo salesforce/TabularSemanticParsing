@@ -352,6 +352,8 @@ class EncoderDecoderLFramework(LFramework):
                 #                  rev_vocab=self.out_vocab,
                 #                  post_process=self.output_post_process,
                 #                  use_table_aware_te=(self.model_id in [BRIDGE]))
+                # import pdb
+                # pdb.set_trace()
                 if self.training:
                     # Compute schema layout
                     if exp.gt_table_names_list:
@@ -393,6 +395,7 @@ class EncoderDecoderLFramework(LFramework):
                     ptr_input_tokens, ptr_input_values, num_excluded_tables, num_excluded_fields = \
                         get_table_aware_transformer_encoder_inputs(
                             exp.text_ptr_values, exp.text_tokens, schema_features, self.tu)
+                    pdb.set_trace()
                     assert(len(ptr_input_tokens) <= self.tu.tokenizer.max_len)
                     if num_excluded_fields > 0:
                         print('Warning: training input truncated')
