@@ -45,9 +45,13 @@ export PYTHONPATH=`pwd` && python -m nltk.downloader punkt
 
 #### Spider
 
-Download the [official data release](https://drive.google.com/u/1/uc?export=download&confirm=pft3&id=1_AckYkinAnhqmRQtGsQgUKAnTHxxX5J0) and unzip the folder. Then manually merge `spider/train_spider.json` with `spider/train_others.json` into a single file `spider/train.json`.
+Download the [official data release](https://drive.google.com/u/1/uc?export=download&confirm=pft3&id=1_AckYkinAnhqmRQtGsQgUKAnTHxxX5J0) and unzip the folder. Manually merge `spider/train_spider.json` with `spider/train_others.json` into a single file `spider/train.json`.
 ```
 mv spider data/ 
+
+# Data Repair (more details in section 4.3 of paper)
+python3 data/spider/scripts/amend_missing_foreign_keys.py data/spider
+
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --process_data 0
 ```
 
@@ -172,10 +176,10 @@ Download cached SQL execution-order to normal order mappings:
 mv dev.eo.pred.restored.pkl.gz data/spider
 gunzip data/spider/dev.eo.pred.restored.pkl.gz
 ```
-Run inference with the downloaded checkpoint:
+<!-- Run inference with the downloaded checkpoint:
 ```
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --inference 0 --checkpoint_path model/bridge-spider-bert-large-ems-70-1-exe-68-2.tar
-```
+```-->
 
 ## Citation
 If you find the resource in this repository helpful, please cite
