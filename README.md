@@ -38,7 +38,7 @@ python3 -m pip install -r requirements.txt
 
 ### Set up Environment
 ```
-export PYTHONPATH=`pwd` && mkdir data && python -m nltk.downloader punkt
+export PYTHONPATH=`pwd` && python -m nltk.downloader punkt
 ```
 
 ### Process Data
@@ -125,15 +125,56 @@ To decode with model ensemble, first list the checkpoint directories of the indi
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --ensemble_inference 0
 ```
 
-### Hyperparameter Changes
-To change the hyperparameters and other experiment set up, start from the [configuration files](configs).
-
-## Commandline Demo
+### Commandline Demo
 You can interact with a pre-trained checkpoint through the commandline using the following commands:
 
 #### Spider
 ```
 ./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --demo 0 --demo_db [db_name] --checkpoint_path [path_to_checkpoint_tar_file]
+```
+
+### Hyperparameter Changes
+To change the hyperparameters and other experiment set up, start from the [configuration files](configs).
+
+## Pre-trained Checkpoints
+
+#### Spider
+Download pre-trained checkpoints here:
+<table>
+   <tr>
+      <td><strong>URL</strong></td>
+      <td><strong>E-SM</strong></td>
+      <td><strong>EXE</strong></td>
+   </tr>
+   <tr>
+      <td>https://drive.google.com/file/d/1dlrUdGMLvvvfR3kNVy76H12rR7gr4DXI/view?usp=sharing</td>
+      <td>70.1</td>
+      <td>68.2</td>
+   </tr>
+</table>
+
+```
+mv bridge-spider-bert-large-ems-70-1-exe-68-2.tar.gz model
+gunzip model/bridge-spider-bert-large-ems-70-1-exe-68-2.tar.gz
+```
+
+Download cached SQL execution-order to normal order mappings:
+<table>
+   <tr>
+      <td><strong>URL</strong></td>
+   </tr>
+   <tr>
+      <td>https://drive.google.com/file/d/1vk14iR4V_f5x4e17MAaL_L8T9wgjcKCy/view?usp=sharing</td>
+   </tr>
+</table>
+
+```
+mv dev.eo.pred.restored.pkl.gz data/spider
+gunzip data/spider/dev.eo.pred.restored.pkl.gz
+```
+Run inference with the downloaded checkpoint:
+```
+./experiment-bridge.sh configs/bridge/spider-bridge-bert-large.sh --inference 0 --checkpoint_path model/bridge-spider-bert-large-ems-70-1-exe-68-2.tar
 ```
 
 ## Citation
