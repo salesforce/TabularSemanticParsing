@@ -348,13 +348,14 @@ class LFramework(nn.Module):
         split = 'test' if self.args.test else 'dev'
         pred_restored_cache_path = os.path.join(
             self.model_dir, '{}.eo.pred.restored.pkl'.format(split))
-        pred_restored_cache = dict()
         if os.path.exists(pred_restored_cache_path):
             with open(pred_restored_cache_path, 'rb') as f:
                 pred_restored_cache = pickle.load(f)
                 pred_restored_cache_size = sum([len(pred_restored_cache[k]) for k in pred_restored_cache])
                 print('{} pre-computed prediction order reconstruction cached'.format(pred_restored_cache_size))
-        return pred_restored_cache
+            return pred_restored_cache
+        else:
+            return dict()
 
     def save_pred_restored_cache(self, pred_restored_cache, newly_cached_size):
         split = 'test' if self.args.test else 'dev'

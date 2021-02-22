@@ -98,8 +98,7 @@ class DataType(Node):
 class Table(Node):
     def __init__(self, name, n_name=None, caseless=True):
         super().__init__(TABLE, name, n_name, caseless)
-        # TODO: The two attributes below are are invalidated by operations that scrambles the table order.
-        #  Similarly, the order of elements in fields does not matter.
+        # TODO: When we scramble the table/field order, the two attributes below are invalid.
         # self.table_id = None
         # self.node_id = None
         self.fields = []
@@ -115,7 +114,7 @@ class Field(Node):
                  is_foreign_key=False):
         super().__init__(FIELD, name, n_name, caseless)
         table.fields.append(self)
-        # TODO: The two attributes below are invalidated by operations that scramble the table/field order.
+        # TODO: When we scramble the table/field order, the two attributes below are invalid.
         # self.field_id = None
         # self.node_id = None
         self.table = table

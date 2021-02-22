@@ -10,6 +10,8 @@ import random
 import json
 import os
 import sys
+from src.parse_args import args
+os.environ['CUDA_VISIBLE_DEVICES'] = '{}'.format(args.gpu)
 
 import src.common.ops as ops
 import src.data_processor.data_loader as data_loader
@@ -26,11 +28,9 @@ from src.semantic_parser.learn_framework import EncoderDecoderLFramework
 from src.trans_checker.args import args as cs_args
 import src.utils.utils as utils
 
-from src.parse_args import args
-
 import torch
-if not args.data_parallel:
-    torch.cuda.set_device('cuda:{}'.format(args.gpu))
+# if not args.data_parallel:
+#     torch.cuda.set_device('cuda:{}'.format(args.gpu))
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 
@@ -115,7 +115,7 @@ def inference(sp):
 
     pred_restored_cache = sp.load_pred_restored_cache()
     pred_restored_cache_size = sum(len(v) for v in pred_restored_cache.values())
-    pred_restored_cache = None
+    # pred_restored_cache = None
     out_dict = sp.inference(examples, restore_clause_order=args.process_sql_in_execution_order,
                             pred_restored_cache=pred_restored_cache,
                             check_schema_consistency_=args.sql_consistency_check,

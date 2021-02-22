@@ -689,6 +689,9 @@ class MaskedCrossEntropyLoss(nn.Module):
         if masked_targets.nelement() == 0:
             return 0
         loss = F.nll_loss(masked_inputs, masked_targets)
+        if torch.isnan(loss):
+            import pdb
+            pdb.set_trace()
         if loss > 1e8:
             import pdb
             pdb.set_trace()

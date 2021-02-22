@@ -139,10 +139,6 @@ class EncoderDecoderLFramework(LFramework):
 
     def inference(self, examples, decode_str_output=True, restore_clause_order=False, pred_restored_cache=None,
                   check_schema_consistency_=True, engine=None, inline_eval=False, model_ensemble=None, verbose=False):
-
-        def get_default_prediction(schema):
-            return 'SELECT * FROM {}'.format(schema.table_rev_index[0].name)
-
         # sanity check
         if self.args.leaderboard_submission or self.args.demo:
             assert (not verbose and not inline_eval and not self.args.use_oracle_tables)
@@ -210,24 +206,25 @@ class EncoderDecoderLFramework(LFramework):
                                 if restore_clause_order:
                                     if pred_restored_cache and db_name in pred_restored_cache and \
                                             pred_sql in pred_restored_cache[db_name]:
-                                        restored_pred = pred_restored_cache[db_name][pred_sql]
+                                        restored_pred, grammatical, schema_consistent = pred_restored_cache[db_name][pred_sql]
                                     else:
-                                        restored_pred = moz_sp.restore_clause_order(
+                                        restored_pred, grammatical, schema_consistent = moz_sp.restore_clause_order(
                                             pred_sql, schema, check_schema_consistency_=check_schema_consistency_,
                                             verbose=verbose)
-                                        if pred_restored_cache:
+                                        if pred_restored_cache and check_schema_consistency_:
+                                            # TODO: we don't cache the results when check_schema_consistency_ is off to
+                                            # avoid logging false negatives
                                             if db_name not in pred_restored_cache:
                                                 pred_restored_cache[db_name] = dict()
-                                            pred_restored_cache[db_name][pred_sql] = restored_pred
-                                    if restored_pred:
-                                        pred_sql = restored_pred
-                                    else:
-                                        pred_sql = None
+                                            pred_restored_cache[db_name][pred_sql] = restored_pred, grammatical, \
+                                                                                     schema_consistent
+                                    if check_schema_consistency_ and not schema_consistent:
+                                        restored_pred = None
+                                    pred_sql = restored_pred
                                 else:
                                     if check_schema_consistency_:
                                         if not moz_sp.check_schema_consistency(
-                                                pred_sql, schema,
-                                                in_execution_order=self.args.process_sql_in_execution_order):
+                                                pred_sql, schema, in_execution_order=self.args.process_sql_in_execution_order):
                                             pred_sql = None
                                 if pred_sql and self.args.execution_guided_decoding:
                                     assert(engine is not None)
@@ -240,6 +237,8 @@ class EncoderDecoderLFramework(LFramework):
                                         pred_sql = None
                             else:
                                 pred_sql = None
+                            # if not pred_sql:
+                            #     pred_sql = self.get_dummy_prediction(schema)
                             if pred_sql:
                                 exp_output_strs.append(pred_sql)
                                 exp_output_scores.append(float(pred_scores[beam_id]))
@@ -275,7 +274,7 @@ class EncoderDecoderLFramework(LFramework):
                             #     import sys
                             #     sys.exit()
                     if not pred_decoded_list[-1] and not self.args.demo:
-                        pred_decoded_list[-1].append(get_default_prediction(schema))
+                        pred_decoded_list[-1].append(self.get_dummy_prediction(schema))
                         pred_decoded_score_list[-1].append(-ops.HUGE_INT)
 
         out_dict = dict()
@@ -355,6 +354,8 @@ class EncoderDecoderLFramework(LFramework):
                 #                  rev_vocab=self.out_vocab,
                 #                  post_process=self.output_post_process,
                 #                  use_table_aware_te=(self.model_id in [BRIDGE]))
+                # import pdb
+                # pdb.set_trace()
                 if self.training:
                     # Compute schema layout
                     if exp.gt_table_names_list:
@@ -363,7 +364,7 @@ class EncoderDecoderLFramework(LFramework):
                         gt_table_names = [token for token, t in
                                           zip(exp.program_singleton_field_tokens, exp.program_singleton_field_token_types) if t == 0]
                         gt_tables = set([schema_graph.get_table_id(t_name) for t_name in gt_table_names])
-                    # Hack: Baseball database has a complex schema which does not fit the input size of BERT. We select
+                    # [Hack] Baseball database has a complex schema which does not fit the input size of BERT. We select
                     # the ground truth tables and randomly add a few other tables for training.
                     if schema_graph.name.startswith('baseball'):
                         tables = list(gt_tables)
@@ -396,6 +397,7 @@ class EncoderDecoderLFramework(LFramework):
                     ptr_input_tokens, ptr_input_values, num_excluded_tables, num_excluded_fields = \
                         get_table_aware_transformer_encoder_inputs(
                             exp.text_ptr_values, exp.text_tokens, schema_features, self.tu)
+                    pdb.set_trace()
                     assert(len(ptr_input_tokens) <= self.tu.tokenizer.max_len)
                     if num_excluded_fields > 0:
                         print('Warning: training input truncated')
@@ -516,6 +518,12 @@ class EncoderDecoderLFramework(LFramework):
                 return output_str, text_ptr_weights_vis
         else:
             return output_str,
+
+    def get_dummy_prediction(self, schema):
+        """
+        Return a dummy SQL query given a specific database.
+        """
+        return 'SELECT * FROM {}'.format(schema.table_rev_index[0].name)
 
     def de_vectorize(self, p_cpu, out_vocab, input_ptr_values, schema=None, table_po=None, field_po=None,
                      return_tokens=False):

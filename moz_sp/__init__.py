@@ -142,10 +142,16 @@ def convert_to_execution_order(sql, schema):
 def restore_clause_order(sql, schema, check_schema_consistency_=True, verbose=False):
     try:
         eo_ast = eo_parse(sql)
-        if check_schema_consistency_ and not check_schema_consistency(eo_ast, schema, verbose=verbose):
-            return None
-        sql = format(eo_ast, schema)
-        return sql
+        if check_schema_consistency_:
+            schema_consist = check_schema_consistency(eo_ast, schema, verbose=verbose)
+            if schema_consist:
+                sql = format(eo_ast, schema)
+                return sql, True, True
+            else:
+                return None, True, False
+        else:
+            sql = format(eo_ast, schema)
+            return sql, True, None
     except Exception as e:
         error_msg = str(e)
         if verbose:
@@ -153,7 +159,7 @@ def restore_clause_order(sql, schema, check_schema_consistency_=True, verbose=Fa
                 print('Parsing error: {}'.format(sql))
             else:
                 print(error_msg)
-        return None
+        return None, False, False
 
 
 def add_join_condition(tokens, schema):
