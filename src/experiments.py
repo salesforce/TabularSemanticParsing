@@ -115,7 +115,7 @@ def inference(sp):
 
     pred_restored_cache = sp.load_pred_restored_cache()
     pred_restored_cache_size = sum(len(v) for v in pred_restored_cache.values())
-    pred_restored_cache = None
+    # pred_restored_cache = None
     out_dict = sp.inference(examples, restore_clause_order=args.process_sql_in_execution_order,
                             pred_restored_cache=pred_restored_cache,
                             check_schema_consistency_=args.sql_consistency_check,

@@ -372,8 +372,8 @@ class BridgeDecoder(RNNDecoder):
             # d.4) merge d.1, d.2 and d.3
             # [batch_size, 1, output_vocab_size + max_in_seq_len]
             point_prob = self.merge_multi_head_attention(attn_weights)
-            # if memory_masks is not None:
-            #     point_prob *= memory_masks.float().unsqueeze(1)
+            if memory_masks is not None:
+                point_prob *= memory_masks.float().unsqueeze(1)
             weighted_point_prob = p_pointer * point_prob
             if encoder_ptr_value_ids is None:
                 point_gen_prob = torch.cat([(1 - p_pointer) * gen_prob, weighted_point_prob], dim=2)

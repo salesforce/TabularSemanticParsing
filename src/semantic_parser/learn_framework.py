@@ -237,8 +237,8 @@ class EncoderDecoderLFramework(LFramework):
                                         pred_sql = None
                             else:
                                 pred_sql = None
-                            if not pred_sql:
-                                pred_sql = self.get_dummy_prediction(schema)
+                            # if not pred_sql:
+                            #     pred_sql = self.get_dummy_prediction(schema)
                             if pred_sql:
                                 exp_output_strs.append(pred_sql)
                                 exp_output_scores.append(float(pred_scores[beam_id]))
@@ -274,7 +274,7 @@ class EncoderDecoderLFramework(LFramework):
                             #     import sys
                             #     sys.exit()
                     if not pred_decoded_list[-1] and not self.args.demo:
-                        pred_decoded_list[-1].append(self.get_default_prediction(schema))
+                        pred_decoded_list[-1].append(self.get_dummy_prediction(schema))
                         pred_decoded_score_list[-1].append(-ops.HUGE_INT)
 
         out_dict = dict()
