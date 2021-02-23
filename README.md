@@ -172,7 +172,7 @@ Download cached SQL execution order to normal order mappings:
    </tr>
 </table>
 
-**Why this cache?** The overhead of converting thousands of SQL queries from execution order to normal order is large, so we cached the conversion for Spider dev set in our experiments. Without using the cached conversion results inference on the dev set will be slow. The model still runs fast for individual queries without using a cache.
+**Why this cache?** The overhead of converting thousands of SQL queries from execution order to normal order is large, so we cached the conversion for Spider dev set in our experiments. Without using the cache inference on the dev set will be slow. The model still runs fast for individual queries without using a cache.
 
 ```
 mv dev.eo.pred.restored.pkl.gz data/spider
