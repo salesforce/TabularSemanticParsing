@@ -127,7 +127,7 @@ def preprocess_split(dataset, split, args, parsed_programs, text_tokenize, progr
         raise NotImplementedError
 
     START_PROCESS = False
-    for i, example in tqdm(enumerate(data_split)):
+    for i, example in enumerate(tqdm(data_split)):
         # if example.db_name != 'assets_maintenance':
         #     continue
         # if 'Glenn' in example.text:
