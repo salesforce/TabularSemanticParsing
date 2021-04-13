@@ -1,5 +1,5 @@
 revtok==0.0.3
-tqdm==4.27
+tqdm==4.29
 torchvision==0.2.1
 mo-future>=2.20
 pyparsing==2.3.0
