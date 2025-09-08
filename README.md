@@ -1,3 +1,5 @@
+⚠️[09.08.25] REPO NO LONGER MAINTAINED, RESEARCH CODE PROVIDED AS IT IS
+
 # Bridging Textual and Tabular Data for Cross-Domain Text-to-SQL Semantic Parsing
 
 This is the official code release of the following paper:
